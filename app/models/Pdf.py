@@ -90,7 +90,7 @@ class Pdf(db.Model):
 
     # 判断用户user_id在该pdf上是否创建了评论
     def user_has_post(self, user_id):
-        return len(list(map(lambda x:x.user_id==int(user_id), self.posts)))>0
+        return len(list(filter(lambda x:x.user_id==int(user_id), self.posts)))>0
 
     # 获取用户在该pdf上的评论主键
     def get_user_post_id(self, user_id):
