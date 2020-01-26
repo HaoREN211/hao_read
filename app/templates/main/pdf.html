@@ -1,0 +1,69 @@
+{#{% extends '_base.html' %}#}
+{% extends 'bootstrap/base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+    {% if pdf.name %}
+        {{ pdf.name }}
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        .frame_style{
+            width: 101%;
+            height: 100%;
+        }
+        body{overflow-x:hidden; overflow-y:auto}
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-7 col-lg-offset-0" style="height: 595px; position: absolute; left: 0;">
+            <iframe style="overflow-x:hidden" class="frame_style" src="http://localhost:3000/static/pdfjs/web/viewer.html?file=\static\files\pdfs\{{ pdf.id }}.pdf">
+            </iframe>
+        </div>
+        <div class="col-lg-5 col-lg-offset-7" style="height: 595px">
+            <div style="position: relative; left: 0;width: 95%; height: 100%">
+            <form method="post" role="form">
+                {{ post.csrf_token() }}
+                {{ post.id }}
+                <div class="row">
+                <div class="form-group">
+                    {{ post.body.label }}
+                    {{ post.body(style="position:relative;height:530px") }}
+                </div></div>
+                <div class="row"><div class="form-group">{{ post.post_submit }}
+                    <input type="button" class="btn btn-xs btn-warning" value="返回"
+                    data-toggle="modal" data-target="#myModalCreate"></div></div>
+
+
+                <div class="modal fade" id="myModalCreate" tabindex="-1" role="dialog" aria-labelledby="myModalCvMainAttributeLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                                </button>
+                                <h4 class="modal-title" id="myModalCvMainAttributeLabel">
+                                        警告
+                                </h4>
+                            </div>
+
+                            <div class="modal-body">
+                                您确认放弃修改吗？
+                            </div>
+                            <div class="modal-footer">
+                                <input type="button" class="btn btn-xs btn-success" value="确认" onclick=window.location.href="{{ url_for("main.index") }}">
+                                <input type="button" class="btn btn-xs btn-primary" data-dismiss="modal" value="取消">
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+
+            </form>
+        </div>
+        </div>
+    </div>
+{% endblock %}

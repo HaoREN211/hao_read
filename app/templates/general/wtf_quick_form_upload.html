@@ -1,0 +1,32 @@
+{% if current_user.is_authenticated and current_user.is_admin %}
+    <input type="button" class="btn btn-xs btn-primary" value="上传"
+           data-toggle="modal" data-target="#myModalUpload{{ item.id }}">
+    <div class="modal fade" id="myModalUpload{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalCvMainAttributeLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title" id="myModalCvMainAttributeLabel">
+                        {% if create_label %}
+                            {{ modify_label }} - {{ item.name }}
+                        {% else %}
+                            上传
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    {% if upload_form %}
+                        <form method="POST" enctype="multipart/form-data">
+                            {{ upload_form[item.id].csrf_token }}
+                            {{ upload_form[item.id].id }}
+                            {{ upload_form[item.id].file_select }}
+                            <br />
+                            {{ upload_form[item.id].file_submit }} {{ upload_form[item.id].cancel }}
+                        </form>
+                    {% endif %}
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{% endif %}

@@ -1,0 +1,39 @@
+{% if current_user.is_authenticated and current_user.is_admin %}
+    <input type="button" class="btn btn-xs btn-danger" value="删除"
+                                data-toggle="modal" data-target="#myModalDelete{{ item.id }}">
+
+    <div class="modal fade" id="myModalDelete{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalCvMainAttributeLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title" id="myModalCvMainAttributeLabel">
+                        {% if create_label %}
+                            {{ delete_label }} - {{ item.name }}
+                        {% else %}
+                            刪除
+                        {% endif %}
+                    </h4>
+                </div>
+                {% if delete_form %}
+                    <form method="post">
+                        <div class="modal-body">
+                            {{ delete_form.csrf_token() }}
+                            <div class="input-group col-sm-10">
+                                {{ delete_form.id(class="form-control", value=item.id) }}
+                            </div>
+                            <p><span>{{ item.name }}</span></p>
+                        </div>
+                        <div class="modal-footer">
+                            {{ delete_form.delete_submit(class="btn btn-xs btn-primary") }}&nbsp;
+                            <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">
+                                关闭
+                            </button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{% endif %}

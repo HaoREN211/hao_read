@@ -1,0 +1,151 @@
+{% extends 'bootstrap/base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+    {% block head %}
+        {{ super() }}
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    {% endblock %}
+
+    {% block title %}
+        {{ super() }}
+        {% if title %}
+            {{ title }}
+        {% else %}
+            书籍阅读
+        {% endif %}
+    {% endblock %}
+
+    {% block scripts %}
+        {# 它已经在基础模板中定义了一些内容 #}
+        {# 想要追加moment.js库的话，
+        就需要使用super()语句，才能继承基础模板中已有的内容，
+        否则就是替换。 #}
+        {{ super() }}
+        <script src="{{ url_for('static',filename='js/moment-with-locales.min.js') }}"
+                integrity="sha256-AdQN98MVZs44Eq2yTwtoKufhnU+uZ7v2kXnD5vqzZVo=" crossorigin="anonymous"></script>
+{#        {{ moment.include_moment() }}#}
+        <script type="application/javascript">
+            moment.locale("zh-CN");
+            function flask_moment_render(elem) {
+                $(elem).text(eval('moment("' + $(elem).data('timestamp') + '").' + $(elem).data('format') + ';'));
+                $(elem).removeClass('flask-moment').show();
+            }
+            function flask_moment_render_all() {
+                $('.flask-moment').each(function() {
+                    flask_moment_render(this);
+                    if ($(this).data('refresh')) {
+                        (function(elem, interval) { setInterval(function() { flask_moment_render(elem) }, interval); })(this, $(this).data('refresh'));
+                    }
+                })
+            }
+            $(document).ready(function() {
+                flask_moment_render_all();
+            });
+        </script>
+
+        {# 使用中文,默认是英语的 #}
+        {{ moment.lang("zh-CN") }}　
+
+        <script type="text/javascript">
+            function relocated_to_user_page(user_page) {
+                if(confirm("您确认要退出吗？")){
+                    window.location.href=user_page
+                }
+            }
+        </script>
+
+
+        <script type="application/javascript" >
+            function delete_post(post_id) {
+                if(confirm("您确认要删除这篇帖子吗？")){
+                    $.post('/delete_post', {
+                        post_id: post_id
+                    }).done(function(response) {
+                        window.location.href = "/index";
+                    }).fail(function(response) {
+                        alert("删除失败");
+                    });
+                }
+            }
+            function edit_post(post_id) {
+                window.location.href = "/edit_post/"+post_id;
+            }
+
+            $('#search_content').bind('keypress', function (event) {
+            if (event.keyCode === 13) {
+                submit_search()
+            }
+        });
+
+            function submit_search() {
+                var search_content = document.getElementById("search_content").value;
+                window.location.href = "/act/search/"+search_content
+            }
+        </script>
+
+    {% endblock %}
+
+    {% block navbar %}
+        <div class="navbar navbar-inverse" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle"
+                    data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    {% if current_user.is_anonymous %}
+                        <a class="navbar-brand" href="{{ url_for('auth.login') }}">登录</a>
+                    {% endif %}
+                </div>
+                <div class="navbar-collapse collapse">
+{#                    <ul class="nav navbar-nav" style="float: left">#}
+{#                        {% if not current_user.is_anonymous %}#}
+{#                            <li>#}
+{#                                <a href="{{ url_for('main.add_post') }}">帖子</a>#}
+{#                            </li>#}
+{#                            <li>#}
+{#                                <a href="{{ url_for('main.add_tag') }}">标签</a>#}
+{#                            </li>#}
+{#                            {% if current_user.is_colleague %}#}
+{#                                <li>#}
+{#                                    <a href="{{ url_for('act.vote', vote_id=1) }}">投票</a>#}
+{#                                </li>#}
+{#                            {% endif %}#}
+{#                        {% endif %}#}
+{#                    </ul>#}
+                    <ul class="nav navbar-nav navbar-right">
+
+                        {% if not current_user.is_anonymous %}
+                            {% if current_user.is_admin %}
+                                <li><a href="{{ url_for('auth.register') }}">注册</a> </li>
+                            {% endif %}
+                            <li>
+                                <a href="{{ url_for('auth.logout') }}">登出</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+
+    {% block content %}
+        <div class="container">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-info" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            {# application content needs to be provided in the app_content block #}
+            {% block app_content %}{% endblock %}
+        </div>
+
+    {% endblock %}
