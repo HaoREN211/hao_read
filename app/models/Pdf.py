@@ -46,7 +46,7 @@ post_view = db.Table(
               comment='PDF'),
     db.Column('view_date',
               db.Date,
-              default=datetime.now(),
+              default=datetime.utcnow().date(),
               comment="浏览事件"),
     db.UniqueConstraint("user_id", "pdf_id", "view_date", name="unique_constrain_user_view_pdf"),
     comment="用户浏览pdf记录"
@@ -79,7 +79,7 @@ class Pdf(db.Model):
     def user_has_viewed_pdf(self, user_id):
         return self.viewers.filter(and_(
             post_view.c.user_id == int(user_id),
-            post_view.c.view_date == datetime.now().date()
+            post_view.c.view_date == datetime.utcnow().date()
         )).count()>0
 
     # 用户浏览pdf事件
