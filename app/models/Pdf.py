@@ -28,29 +28,36 @@ pdf_group = db.Table('pdf_group',
     comment='PDF-用户组'
 )
 
+class PostView(db.Model):
+    __table_args__ = (db.UniqueConstraint("user_id", "pdf_id", "view_date", name="unique_constrain_user_view_pdf"), )
+    id = db.Column(BIGINT(unsigned=True), primary_key=True, comment='PDF主键')
+
+    user_id = db.Column(BIGINT(unsigned=True), db.ForeignKey("user.id"), comment='用户')
+    pdf_id = db.Column(BIGINT(unsigned=True), db.ForeignKey("pdf.id"), comment='PDF')
+    view_date = db.Column(db.Date, default=datetime.now(), comment='浏览事件')
 
 
-post_view = db.Table(
-    'post_view',
-    db.Column('id',
-              BIGINT(unsigned=True),
-              primary_key=True,
-              comment='用户查看pdf主键'),
-    db.Column('user_id',
-              BIGINT(unsigned=True),
-              db.ForeignKey('user.id'),
-              comment='用户'),
-    db.Column('pdf_id',
-              BIGINT(unsigned=True),
-              db.ForeignKey('pdf.id'),
-              comment='PDF'),
-    db.Column('view_date',
-              db.Date,
-              default=datetime.utcnow().date(),
-              comment="浏览事件"),
-    db.UniqueConstraint("user_id", "pdf_id", "view_date", name="unique_constrain_user_view_pdf"),
-    comment="用户浏览pdf记录"
-)
+# post_view = db.Table(
+#     'post_view',
+#     db.Column('id',
+#               BIGINT(unsigned=True),
+#               primary_key=True,
+#               comment='用户查看pdf主键'),
+#     db.Column('user_id',
+#               BIGINT(unsigned=True),
+#               db.ForeignKey('user.id'),
+#               comment='用户'),
+#     db.Column('pdf_id',
+#               BIGINT(unsigned=True),
+#               db.ForeignKey('pdf.id'),
+#               comment='PDF'),
+#     db.Column('view_date',
+#               db.Date,
+#               default=datetime.utcnow().date(),
+#               comment="浏览事件"),
+#     db.UniqueConstraint("user_id", "pdf_id", "view_date", name="unique_constrain_user_view_pdf"),
+#     comment="用户浏览pdf记录"
+# )
 
 
 class Pdf(db.Model):
@@ -71,22 +78,22 @@ class Pdf(db.Model):
         secondaryjoin=(pdf_group.c.group_id == id),
         backref=db.backref('pdfs', lazy='dynamic'), lazy='dynamic')
 
-    viewers = db.relationship(
-        'User', secondary=post_view,
-        lazy="dynamic")
-
-    # 判断用户当日是否浏览了帖子
-    def user_has_viewed_pdf(self, user_id):
-        return self.viewers.filter(and_(
-            post_view.c.user_id == int(user_id),
-            post_view.c.view_date == datetime.utcnow().date()
-        )).count()>0
+    # viewers = db.relationship(
+    #     'User', secondary=post_view,
+    #     lazy="dynamic")
+    #
+    # # 判断用户当日是否浏览了帖子
+    # def user_has_viewed_pdf(self, user_id):
+    #     return self.viewers.filter(and_(
+    #         post_view.c.user_id == int(user_id),
+    #         post_view.c.view_date == datetime.utcnow().date()
+    #     )).count()>0
 
     # 用户浏览pdf事件
-    def user_view_pdf(self, user_id):
-        if not self.user_has_viewed_pdf(user_id):
-            current_user = User.query.get(int(user_id))
-            self.viewers.append(current_user)
+    # def user_view_pdf(self, user_id):
+    #     if not self.user_has_viewed_pdf(user_id):
+    #         current_user = User.query.get(int(user_id))
+    #         self.viewers.append(current_user)
 
     # 判断用户user_id在该pdf上是否创建了评论
     def user_has_post(self, user_id):

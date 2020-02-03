@@ -5,7 +5,7 @@
 
 from app import db
 from app.blueprint.main import bp
-from app.models.Pdf import Pdf
+from app.models.Pdf import Pdf, PostView
 from app.models.Post import Post
 from flask import render_template, redirect, url_for, request, flash
 from flask_login import current_user
@@ -15,6 +15,7 @@ from app.blueprint.main.forms.pdf import PdfModifyForm, PdfCreateForm, PostForm
 from datetime import datetime
 from app.blueprint.main.forms.file import FileForm
 from flask_login import login_required
+from operator import and_
 
 @bp.route('/index', methods=['GET', 'POST'])
 @bp.route("/", methods=['GET', 'POST'])
@@ -86,7 +87,18 @@ def index_id(id):
     post_form = PostForm()
 
     # 新增用户浏览
-    current_pdf.user_view_pdf(current_user.id)
+    view_cnt = PostView.query.filter(and_(and_(PostView.user_id==current_user.id,
+                                          PostView.pdf_id==id),
+                                          PostView.view_date==datetime.now().date())).count()
+    if view_cnt == 0:
+        new_view = PostView(
+            user_id=current_user.id,
+            pdf_id=id,
+            view_date=datetime.now().date()
+        )
+        db.session.add(new_view)
+    # current_pdf.user_view_pdf(current_user.id)
+
 
     # 如果用户在该pdf上还没创建评论的话则创建
     if not current_pdf.user_has_post(current_user.id):
